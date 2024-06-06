@@ -15,8 +15,52 @@ class ProveedorController extends Controller
     public function index()
     {
         //Mostrar todos los registros de la tabla
-        return view('proveedor.index');
+        $vs_proveedores = Proveedor::where('estado', '=', "Activo")
+        //lo de abajo es para los join
+        //->join('users', 'users.id', '=', 'proveedor.user_id')
+        //->select('users.name', 'users.email', 'videos.*')
+        ->get();
+        $proveedores = $this->cargarDT($vs_proveedores);
+        return view('proveedor.index')->with('proveedores', $proveedores);
     }
+
+    public function cargarDT($consulta)
+   {
+       $proveedores = [];
+       foreach ($consulta as $key => $value) {
+           $ruta = "eliminar" . $value['id'];
+           $eliminar = "#";//route('delete-proveedor', $value['id']);
+           $actualizar = route('proveedores.edit', $value['id']);
+           $acciones = '
+          <div class="btn-acciones">
+              <div class="btn-circle">
+                  <a href="' . $actualizar . '" role="button" class="btn btn-success" title="Actualizar">
+                      <i class="far fa-edit"></i>
+                  </a>
+                   <a role="button" class="btn btn-danger" onclick="modal('.$value['id'].')" data-bs-toggle="modal" data-bs-target="#exampleModal"">
+                      <i class="far fa-trash-alt"></i>
+                  </a>
+              </div>
+          </div>
+';
+
+
+           $proveedores[$key] = array(
+               
+               $value['id'],
+               $value['nombre'],
+               $value['email'],
+               $value['telefono'],
+               $acciones
+           );
+       }
+
+
+
+
+       return $proveedores;
+   }
+
 
     /**
      * Show the form for creating a new resource.
@@ -99,4 +143,25 @@ class ProveedorController extends Controller
     {
         //Borra un registro
     }
+
+    public function deleteProveedor($proveedor_id){
+        $proveedor = Proveedor::find($proveedor_id);
+        if($proveedor){
+            $proveedor->estatus ="Inactivo";
+            $proveedor->update();
+            return redirect()->route('proveedor.index')->with(
+                array(
+                    "message" => "El proveedor se ha eliminado correctamente"
+                )
+                );
+        }
+        else{
+            return redirect()->route('proveedor.index')->with(
+                array(
+                    "message" => "El proveedor que intentado eliminar no existe"
+                )
+                );  
+        }
+    }
+
 }

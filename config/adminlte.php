@@ -322,10 +322,10 @@ return [
             'label' => 4,
             'label_color' => 'success',
         ],
-        ['header' => 'account_settings'],
+        ['header' => 'Proveedores'],
         [
-            'text' => 'profile',
-            'url' => 'admin/settings',
+            'text' => 'ListaProveedores',
+            'url' => 'proveedores/create',
             'icon' => 'fas fa-fw fa-user',
         ],
         [
@@ -425,7 +425,7 @@ return [
 
     'plugins' => [
         'Datatables' => [
-            'active' => false,
+            'active' => true,
             'files' => [
                 [
                     'type' => 'js',
