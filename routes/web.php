@@ -20,3 +20,7 @@ Route::get('/delete-proveedor/{proveedor_id}', array(
     'middleware' => 'auth',
     'uses' =>'\App\Http\Controllers\ProveedorController@deleteProveedor'
 ));
+//Ruta para hacer el PDF
+Route::get('/imprimir', [App\Http\Controllers\GeneradorController::class, 'imprimir'])->name('imprimir');
+//Imrprimir todos los proveedores
+Route::get('/imprimirProveedor', [App\Http\Controllers\ProveedorController::class, 'imprimir'])->name('imprimirProv');

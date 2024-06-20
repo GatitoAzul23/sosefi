@@ -3,7 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-
+use Barryvdh\DomPDF\Facade as PDF;
+use Carbon\Carbon;
 //Mandar a llamar el modelo
 use App\Models\Proveedor;
 
@@ -24,42 +25,44 @@ class ProveedorController extends Controller
         return view('proveedor.index')->with('proveedores', $proveedores);
     }
 
-    public function cargarDT($consulta)
-   {
-       $proveedores = [];
-       foreach ($consulta as $key => $value) {
-           $ruta = "eliminar" . $value['id'];
-           $eliminar = "#";//route('delete-proveedor', $value['id']);
-           $actualizar = route('proveedores.edit', $value['id']);
-           $acciones = '
-          <div class="btn-acciones">
-              <div class="btn-circle">
-                  <a href="' . $actualizar . '" role="button" class="btn btn-success" title="Actualizar">
-                      <i class="far fa-edit"></i>
-                  </a>
-                   <a role="button" class="btn btn-danger" onclick="modal('.$value['id'].')" data-bs-toggle="modal" data-bs-target="#exampleModal"">
-                      <i class="far fa-trash-alt"></i>
-                  </a>
-              </div>
-          </div>
-';
+    //Pruebas para imprimir el PDF
+    public function imprimir(){
+        $proveedor=Proveedor::where('estado', '=', "Activo")->get();
+        //$proveedorUltimo = Proveedor::where('estado', '=', "Activo")->orderBy('updated_at', 'DESC')->get();
+        $pdf = \PDF::loadView('proveedor.listaProv',compact('proveedor'));
+        return $pdf->download('ejemploProv.pdf');
+        
+    }
 
+    public function cargarDT($consulta){
+        $proveedores = [];
+        foreach ($consulta as $key => $value) {
+            $ruta = "eliminar" . $value['id'];
+            $eliminar = route('proveedorDelete', $value['id']);
+            $actualizar = route('proveedores.edit', $value['id']);
+            $acciones = '
+            <div class="btn-acciones">
+                <div class="btn-circle">
+                    <a href="' . $actualizar . '" role="button" class="btn btn-success" title="Actualizar">
+                        <i class="far fa-edit"></i>
+                    </a>
+                    <a role="button" class="btn btn-danger" onclick="modal('.$value['id'].')" data-bs-toggle="modal" data-bs-target="#exampleModal"">
+                        <i class="far fa-trash-alt"></i>
+                    </a>
+                </div>
+            </div>
+            ';
 
-           $proveedores[$key] = array(
-               
-               $value['id'],
-               $value['nombre'],
-               $value['email'],
-               $value['telefono'],
-               $acciones
-           );
-       }
-
-
-
-
-       return $proveedores;
-   }
+            $proveedores[$key] = array(   
+                $value['id'],
+                $value['nombre'],
+                $value['email'],
+                $value['telefono'],
+                $acciones
+            );
+        }
+        return $proveedores;
+    }
 
 
     /**
@@ -147,16 +150,16 @@ class ProveedorController extends Controller
     public function deleteProveedor($proveedor_id){
         $proveedor = Proveedor::find($proveedor_id);
         if($proveedor){
-            $proveedor->estatus ="Inactivo";
+            $proveedor->estado ="Inactivo";
             $proveedor->update();
-            return redirect()->route('proveedor.index')->with(
+            return redirect()->route('proveedores.index')->with(
                 array(
                     "message" => "El proveedor se ha eliminado correctamente"
                 )
                 );
         }
         else{
-            return redirect()->route('proveedor.index')->with(
+            return redirect()->route('proveedores.index')->with(
                 array(
                     "message" => "El proveedor que intentado eliminar no existe"
                 )
